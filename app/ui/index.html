@@ -83,15 +83,22 @@
           </section>
           <section class="panel">
             <h3>任务配置</h3>
-            <div class="form-grid three-col compact-grid">
-              <label>打图轮数<input id="dig_rounds" type="number" min="1" /></label>
-              <label>师门轮数<input id="master_rounds" type="number" min="1" /></label>
-              <label>抓鬼轮数<input id="ghost_rounds" type="number" min="1" /></label>
-            </div>
-            <div class="check-row vertical-checks">
-              <label><input id="dig_enabled" type="checkbox" /> 启用自动打图</label>
-              <label><input id="master_enabled" type="checkbox" /> 启用自动师门</label>
-              <label><input id="ghost_enabled" type="checkbox" /> 启用自动抓鬼（队长）</label>
+            <div class="task-config-grid">
+              <div class="task-config-card">
+                <div class="task-config-title">自动打图</div>
+                <label>轮数<input id="dig_rounds" type="number" min="1" /></label>
+                <label class="toggle-line"><input id="dig_enabled" type="checkbox" /> 启用自动打图</label>
+              </div>
+              <div class="task-config-card">
+                <div class="task-config-title">自动师门</div>
+                <label>轮数<input id="master_rounds" type="number" min="1" /></label>
+                <label class="toggle-line"><input id="master_enabled" type="checkbox" /> 启用自动师门</label>
+              </div>
+              <div class="task-config-card">
+                <div class="task-config-title">自动抓鬼（队长）</div>
+                <label>轮数<input id="ghost_rounds" type="number" min="1" /></label>
+                <label class="toggle-line"><input id="ghost_enabled" type="checkbox" /> 启用自动抓鬼（队长）</label>
+              </div>
             </div>
           </section>
         </div>
