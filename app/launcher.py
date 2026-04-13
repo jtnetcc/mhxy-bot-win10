@@ -51,7 +51,19 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/api/status':
-            return self._json({**STATE, 'config': CONFIG})
+            debug = {
+                'window': {'title': STATE['boundWindow'], 'mode': 'mock'},
+                'vision': {
+                    'detections': ['背包按钮', '任务栏', '挂机按钮'],
+                    'ocr_text': '去长安城郊外挖宝',
+                    'target_map': '长安城郊外'
+                },
+                'route': {
+                    'profile': CONFIG['navigation']['route_profile'],
+                    'steps': ['打开地图', '切换到目标场景', '执行路线模板 default', '到达挖图点附近']
+                }
+            }
+            return self._json({**STATE, 'config': CONFIG, 'debug': debug})
         return super().do_GET()
 
     def do_POST(self):
@@ -69,6 +81,13 @@ class Handler(SimpleHTTPRequestHandler):
             CONFIG['safety']['stop_hotkey'] = data.get('stop_hotkey', CONFIG['safety']['stop_hotkey'])
             CONFIG['safety']['pause_hotkey'] = data.get('pause_hotkey', CONFIG['safety']['pause_hotkey'])
             CONFIG['safety']['timeout_seconds'] = int(data.get('timeout_seconds', CONFIG['safety']['timeout_seconds']))
+            CONFIG['navigation']['route_profile'] = data.get('route_profile', CONFIG['navigation']['route_profile'])
+            CONFIG['ocr']['task_text_region'] = [
+                int(data.get('ocr_x', CONFIG['ocr']['task_text_region'][0])),
+                int(data.get('ocr_y', CONFIG['ocr']['task_text_region'][1])),
+                int(data.get('ocr_w', CONFIG['ocr']['task_text_region'][2])),
+                int(data.get('ocr_h', CONFIG['ocr']['task_text_region'][3])),
+            ]
             save_config(CONFIG)
             STATE['logs'].append(f"[{time.strftime('%H:%M:%S')}] [config] 已保存可视化参数")
             STATE['logs'] = STATE['logs'][-20:]
