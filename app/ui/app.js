@@ -22,6 +22,10 @@ function fillDebug(debug) {
     '识别元素: ' + debug.vision.detections.join(' / '),
     '目标地图: ' + debug.vision.target_map,
   ].join('\n');
+  document.getElementById('stat_dig').textContent = cfg.tasks.dig_treasure.max_rounds;
+  document.getElementById('stat_master').textContent = cfg.tasks.master_task.max_rounds;
+  document.getElementById('stat_ghost').textContent = cfg.tasks.ghost_hunt_leader.max_rounds;
+  document.getElementById('stat_route').textContent = cfg.navigation.route_profile;
   document.getElementById('ocr_debug').textContent = [
     'OCR 文本: ' + debug.vision.ocr_text,
     'OCR 区域: 使用配置中的 task_text_region',
