@@ -1,0 +1,16 @@
+templates:
+  bag_button:
+    path: assets/templates/dig/bag_button.png
+    threshold: 0.92
+  task_bar:
+    path: assets/templates/dig/task_bar.png
+    threshold: 0.90
+  map_button:
+    path: assets/templates/dig/map_button.png
+    threshold: 0.90
+  dig_action:
+    path: assets/templates/dig/dig_action.png
+    threshold: 0.88
+  battle_end:
+    path: assets/templates/common/battle_end.png
+    threshold: 0.90

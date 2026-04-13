@@ -21,6 +21,12 @@ tasks:
 navigation:
   mode: route-template
   route_profile: default
+ocr:
+  provider: planned
+  language: zh-CN
+  task_text_region: [0, 0, 300, 120]
+templates:
+  profile: dig-ui.example
 safety:
   stop_hotkey: F8
   pause_hotkey: F9

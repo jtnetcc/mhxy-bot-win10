@@ -1,0 +1,16 @@
+name: default
+maps:
+  - name: 长安城
+    waypoints:
+      - [120, 210]
+      - [188, 240]
+      - [260, 310]
+  - name: 长安城郊外
+    waypoints:
+      - [88, 166]
+      - [140, 196]
+      - [210, 248]
+strategy:
+  arrive_threshold: 18
+  retry_on_stuck: 3
+  step_delay_ms: 500
