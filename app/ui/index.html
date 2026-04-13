@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mhxy-bot-win10 Prototype</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>mhxy-bot-win10</h1>
+        <p>Win10 单开版原型 · 打图 / 师门 / 抓鬼（队长）</p>
+      </div>
+      <div class="badge">V0 Prototype</div>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <h2>窗口绑定</h2>
+        <div class="status-row"><span>窗口状态</span><strong id="boundWindow">未绑定</strong></div>
+        <div class="status-row"><span>当前任务</span><strong id="currentTask">空闲</strong></div>
+        <div class="status-row"><span>运行状态</span><strong id="running">否</strong></div>
+        <button onclick="act('bind')">绑定游戏窗口</button>
+      </div>
+
+      <div class="card">
+        <h2>任务面板</h2>
+        <div class="button-group">
+          <button onclick="act('start-dig')">启动自动打图</button>
+          <button onclick="act('start-master')">启动自动师门</button>
+          <button onclick="act('start-ghost')">启动自动抓鬼（队长）</button>
+        </div>
+        <div class="button-group compact">
+          <button class="secondary" onclick="act('pause')">暂停</button>
+          <button class="danger" onclick="act('stop')">停止</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>巡线与战斗模拟</h2>
+        <p>当前版本先演示流程和交互，后续再接真实识图与动作执行。</p>
+        <div class="button-group compact">
+          <button class="secondary" onclick="act('simulate-route')">模拟巡线</button>
+          <button class="secondary" onclick="act('simulate-battle')">模拟战斗回链</button>
+        </div>
+      </div>
+
+      <div class="card wide">
+        <h2>运行日志</h2>
+        <pre id="logs"></pre>
+      </div>
+    </section>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

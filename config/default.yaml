@@ -1,0 +1,27 @@
+app:
+  name: mhxy-bot-win10
+  version: 0.1.0-prototype
+  mode: prototype
+window:
+  title_keyword: 梦幻西游
+  single_instance: true
+  resolution:
+    width: 1280
+    height: 720
+tasks:
+  dig_treasure:
+    enabled: true
+    max_rounds: 20
+  master_task:
+    enabled: true
+    max_rounds: 20
+  ghost_hunt_leader:
+    enabled: true
+    max_rounds: 20
+navigation:
+  mode: route-template
+  route_profile: default
+safety:
+  stop_hotkey: F8
+  pause_hotkey: F9
+  timeout_seconds: 120
