@@ -6,18 +6,34 @@ import time
 import threading
 import webbrowser
 import os
+import sys
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT_DIR))
+
+from app.core.config import load_config
+from app.window.window_service import WindowService
+from app.vision.template_service import TemplateService
+from app.navigation.route_engine import RouteEngine
+from app.tasks.dig_treasure import DigTreasureTask
 
 BASE_DIR = Path(__file__).resolve().parent
 UI_DIR = BASE_DIR / 'ui'
+CONFIG = load_config()
+WINDOW_SERVICE = WindowService(CONFIG)
+TEMPLATE_SERVICE = TemplateService(CONFIG)
+ROUTE_ENGINE = RouteEngine(CONFIG)
+DIG_TASK = DigTreasureTask(CONFIG, WINDOW_SERVICE, TEMPLATE_SERVICE, ROUTE_ENGINE)
+
 STATE = {
     'app': 'mhxy-bot-win10',
-    'version': '0.1.0-prototype',
+    'version': '0.2.0-dig-preview',
     'boundWindow': '未绑定',
     'currentTask': '空闲',
     'running': False,
     'logs': [
-        '[init] prototype ready',
-        '[hint] 当前版本仅用于演示界面与流程，不包含真实游戏控制',
+        '[init] dig preview ready',
+        '[hint] 当前版本已接入自动打图任务底座（mock 接口层）',
     ],
 }
 
@@ -43,12 +59,15 @@ class Handler(SimpleHTTPRequestHandler):
             action = self.path.split('/api/action/', 1)[1]
             now = time.strftime('%H:%M:%S')
             if action == 'bind':
-                STATE['boundWindow'] = '梦幻西游 - 示例窗口'
-                STATE['logs'].append(f'[{now}] [bind] 已绑定示例窗口')
+                result = WINDOW_SERVICE.bind_game_window()
+                STATE['boundWindow'] = result['window_title']
+                STATE['logs'].append(f"[{now}] [bind] 已绑定窗口: {result['window_title']} ({result['mode']})")
             elif action == 'start-dig':
                 STATE['running'] = True
                 STATE['currentTask'] = '自动打图'
-                STATE['logs'].append(f'[{now}] [task] 启动 自动打图（演示）')
+                STATE['logs'].append(f'[{now}] [task] 启动 自动打图（预演）')
+                for line in DIG_TASK.run_preview():
+                    STATE['logs'].append(line)
             elif action == 'start-master':
                 STATE['running'] = True
                 STATE['currentTask'] = '自动师门'
