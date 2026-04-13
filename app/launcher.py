@@ -11,7 +11,7 @@ import sys
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 
-from app.core.config import load_config
+from app.core.config import load_config, save_config
 from app.window.window_service import WindowService
 from app.vision.template_service import TemplateService
 from app.navigation.route_engine import RouteEngine
@@ -51,10 +51,28 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/api/status':
-            return self._json(STATE)
+            return self._json({**STATE, 'config': CONFIG})
         return super().do_GET()
 
     def do_POST(self):
+        if self.path == '/api/config/save':
+            length = int(self.headers.get('Content-Length', '0'))
+            body = self.rfile.read(length)
+            data = json.loads(body.decode('utf-8'))
+            CONFIG['window']['title_keyword'] = data.get('title_keyword', CONFIG['window']['title_keyword'])
+            CONFIG['tasks']['dig_treasure']['enabled'] = bool(data.get('dig_enabled', True))
+            CONFIG['tasks']['dig_treasure']['max_rounds'] = int(data.get('dig_rounds', 20))
+            CONFIG['tasks']['master_task']['enabled'] = bool(data.get('master_enabled', True))
+            CONFIG['tasks']['master_task']['max_rounds'] = int(data.get('master_rounds', 20))
+            CONFIG['tasks']['ghost_hunt_leader']['enabled'] = bool(data.get('ghost_enabled', True))
+            CONFIG['tasks']['ghost_hunt_leader']['max_rounds'] = int(data.get('ghost_rounds', 20))
+            CONFIG['safety']['stop_hotkey'] = data.get('stop_hotkey', CONFIG['safety']['stop_hotkey'])
+            CONFIG['safety']['pause_hotkey'] = data.get('pause_hotkey', CONFIG['safety']['pause_hotkey'])
+            CONFIG['safety']['timeout_seconds'] = int(data.get('timeout_seconds', CONFIG['safety']['timeout_seconds']))
+            save_config(CONFIG)
+            STATE['logs'].append(f"[{time.strftime('%H:%M:%S')}] [config] 已保存可视化参数")
+            STATE['logs'] = STATE['logs'][-20:]
+            return self._json({'ok': True, 'config': CONFIG})
         if self.path.startswith('/api/action/'):
             action = self.path.split('/api/action/', 1)[1]
             now = time.strftime('%H:%M:%S')
