@@ -61,6 +61,12 @@ class Handler(SimpleHTTPRequestHandler):
                 'route': {
                     'profile': CONFIG['navigation']['route_profile'],
                     'steps': ['打开地图', '切换到目标场景', '执行路线模板 default', '到达挖图点附近']
+                },
+                'stats': {
+                    'completed_rounds': 3,
+                    'current_scene': '长安城郊外',
+                    'recent_error': '无',
+                    'runtime': '00:12:36'
                 }
             }
             return self._json({**STATE, 'config': CONFIG, 'debug': debug})
