@@ -15,15 +15,15 @@ from app.core.config import load_config
 from app.window.window_service import WindowService
 from app.vision.template_service import TemplateService
 from app.navigation.route_engine import RouteEngine
-from app.tasks.dig_treasure import DigTreasureTask
+from app.core.task_registry import TaskRegistry
+from app.core.pathing import UI_DIR
 
 BASE_DIR = Path(__file__).resolve().parent
-UI_DIR = BASE_DIR / 'ui'
 CONFIG = load_config()
 WINDOW_SERVICE = WindowService(CONFIG)
 TEMPLATE_SERVICE = TemplateService(CONFIG)
 ROUTE_ENGINE = RouteEngine(CONFIG)
-DIG_TASK = DigTreasureTask(CONFIG, WINDOW_SERVICE, TEMPLATE_SERVICE, ROUTE_ENGINE)
+TASKS = TaskRegistry(CONFIG, WINDOW_SERVICE, TEMPLATE_SERVICE, ROUTE_ENGINE)
 
 STATE = {
     'app': 'mhxy-bot-win10',
@@ -66,16 +66,20 @@ class Handler(SimpleHTTPRequestHandler):
                 STATE['running'] = True
                 STATE['currentTask'] = '自动打图'
                 STATE['logs'].append(f'[{now}] [task] 启动 自动打图（预演）')
-                for line in DIG_TASK.run_preview():
+                for line in TASKS.get('dig_treasure').run_preview():
                     STATE['logs'].append(line)
             elif action == 'start-master':
                 STATE['running'] = True
                 STATE['currentTask'] = '自动师门'
-                STATE['logs'].append(f'[{now}] [task] 启动 自动师门（演示）')
+                STATE['logs'].append(f'[{now}] [task] 启动 自动师门（预演）')
+                for line in TASKS.get('master_task').run_preview():
+                    STATE['logs'].append(line)
             elif action == 'start-ghost':
                 STATE['running'] = True
                 STATE['currentTask'] = '自动抓鬼（队长）'
-                STATE['logs'].append(f'[{now}] [task] 启动 自动抓鬼（队长）（演示）')
+                STATE['logs'].append(f'[{now}] [task] 启动 自动抓鬼（队长）（预演）')
+                for line in TASKS.get('ghost_hunt_leader').run_preview():
+                    STATE['logs'].append(line)
             elif action == 'pause':
                 STATE['running'] = False
                 STATE['logs'].append(f'[{now}] [control] 已暂停')

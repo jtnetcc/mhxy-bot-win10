@@ -24,7 +24,7 @@ jobs:
 
       - name: Build exe
         run: |
-          pyinstaller --noconfirm --onefile --name mhxy-bot-win10 app/launcher.py
+          pyinstaller --noconfirm --onefile --name mhxy-bot-win10 --add-data "app/ui;app/ui" --add-data "config;config" app/launcher.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
