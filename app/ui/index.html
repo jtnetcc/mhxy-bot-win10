@@ -48,51 +48,58 @@
       </div>
 
       <div class="card wide">
-        <h2>基础设置</h2>
-        <div class="form-grid">
-          <label>窗口标题关键词<input id="title_keyword" /></label>
-          <label>停止热键<input id="stop_hotkey" /></label>
-          <label>暂停热键<input id="pause_hotkey" /></label>
-          <label>超时秒数<input id="timeout_seconds" type="number" min="10" /></label>
-          <label>巡线模板<input id="route_profile" /></label>
+        <h2>配置中心</h2>
+        <div class="section-grid two-col">
+          <section class="panel">
+            <h3>基础设置</h3>
+            <div class="form-grid two-col">
+              <label>窗口标题关键词<input id="title_keyword" /></label>
+              <label>巡线模板<input id="route_profile" /></label>
+              <label>停止热键<input id="stop_hotkey" /></label>
+              <label>暂停热键<input id="pause_hotkey" /></label>
+              <label>超时秒数<input id="timeout_seconds" type="number" min="10" /></label>
+            </div>
+          </section>
+          <section class="panel">
+            <h3>任务配置</h3>
+            <div class="form-grid three-col compact-grid">
+              <label>打图轮数<input id="dig_rounds" type="number" min="1" /></label>
+              <label>师门轮数<input id="master_rounds" type="number" min="1" /></label>
+              <label>抓鬼轮数<input id="ghost_rounds" type="number" min="1" /></label>
+            </div>
+            <div class="check-row vertical-checks">
+              <label><input id="dig_enabled" type="checkbox" /> 启用自动打图</label>
+              <label><input id="master_enabled" type="checkbox" /> 启用自动师门</label>
+              <label><input id="ghost_enabled" type="checkbox" /> 启用自动抓鬼（队长）</label>
+            </div>
+          </section>
         </div>
-      </div>
-
-      <div class="card wide">
-        <h2>任务配置</h2>
-        <div class="form-grid">
-          <label>打图轮数<input id="dig_rounds" type="number" min="1" /></label>
-          <label>师门轮数<input id="master_rounds" type="number" min="1" /></label>
-          <label>抓鬼轮数<input id="ghost_rounds" type="number" min="1" /></label>
-        </div>
-        <div class="check-row">
-          <label><input id="dig_enabled" type="checkbox" /> 启用自动打图</label>
-          <label><input id="master_enabled" type="checkbox" /> 启用自动师门</label>
-          <label><input id="ghost_enabled" type="checkbox" /> 启用自动抓鬼（队长）</label>
-        </div>
-      </div>
-
-      <div class="card wide">
-        <h2>OCR 调试区</h2>
-        <div class="form-grid">
-          <label>OCR X<input id="ocr_x" type="number" /></label>
-          <label>OCR Y<input id="ocr_y" type="number" /></label>
-          <label>OCR W<input id="ocr_w" type="number" /></label>
-          <label>OCR H<input id="ocr_h" type="number" /></label>
-        </div>
-        <div class="debug-box" id="ocr_debug"></div>
-      </div>
-
-      <div class="card wide">
-        <h2>路线管理区</h2>
-        <div class="debug-box" id="route_debug"></div>
-      </div>
-
-      <div class="card wide">
-        <h2>识别调试区</h2>
-        <div class="debug-box" id="vision_debug"></div>
-        <div class="button-group compact top-gap">
+        <div class="button-row right top-gap">
           <button onclick="saveConfig()">保存参数</button>
+        </div>
+      </div>
+
+      <div class="card wide">
+        <h2>调试与路线</h2>
+        <div class="section-grid three-col">
+          <section class="panel">
+            <h3>OCR 调试区</h3>
+            <div class="form-grid two-col compact-grid">
+              <label>OCR X<input id="ocr_x" type="number" /></label>
+              <label>OCR Y<input id="ocr_y" type="number" /></label>
+              <label>OCR W<input id="ocr_w" type="number" /></label>
+              <label>OCR H<input id="ocr_h" type="number" /></label>
+            </div>
+            <div class="debug-box" id="ocr_debug"></div>
+          </section>
+          <section class="panel">
+            <h3>路线管理区</h3>
+            <div class="debug-box tall" id="route_debug"></div>
+          </section>
+          <section class="panel">
+            <h3>识别调试区</h3>
+            <div class="debug-box tall" id="vision_debug"></div>
+          </section>
         </div>
       </div>
 
