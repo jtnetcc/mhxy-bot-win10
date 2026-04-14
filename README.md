@@ -11,8 +11,13 @@ Win10 单开版梦幻西游端游自动化项目骨架。
 
 ## 当前阶段
 - 已完成项目目录初始化
-- 后续文件统一放在本目录内
-- 后期再整理并同步到 Git 远程仓库
+- 已补齐自动打图开发骨架（状态机 / OCR mock / 路线模板 / 模板清单）
+- 已接入 Windows 打包与标准安装器工作流
+
+## Windows 打包
+- 便携版：GitHub Actions 产出 `mhxy-bot-win10.exe`
+- 安装版：GitHub Actions 产出 `mhxy-bot-win10-setup.exe`
+- 安装器基于 Inno Setup，支持开始菜单、桌面快捷方式、安装目录
 
 ## 目录说明
 - `app/`：主程序代码
