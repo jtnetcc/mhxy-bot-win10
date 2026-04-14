@@ -3,136 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mhxy-bot-win10 Prototype</title>
+  <title>mhxy-bot-win10 Studio Preview</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="shell">
-    <aside class="sidebar">
-      <div class="brand compact-brand">
-        <div class="brand-title">mhxy-bot-win10</div>
-        <div class="brand-sub">Win10 单开版原型</div>
-        <div class="badge">V0.6 Desktop Preview</div>
+  <div class="studio-shell">
+    <header class="studio-toolbar">
+      <div class="toolbar-left">
+        <div class="app-title">梦幻西游脚本工坊 - 预演版</div>
+        <div class="toolbar-group">
+          <button class="tb-btn">新建</button>
+          <button class="tb-btn">保存</button>
+          <button class="tb-btn">导入</button>
+          <button class="tb-btn">导出</button>
+          <button class="tb-btn">变量</button>
+          <button class="tb-btn">设置</button>
+        </div>
       </div>
+      <div class="toolbar-right">
+        <button class="tb-btn primary" onclick="act('bind')">绑定窗口</button>
+        <button class="tb-btn primary" onclick="act('start-dig')">运行</button>
+        <button class="tb-btn" onclick="act('pause')">暂停</button>
+        <button class="tb-btn danger" onclick="act('stop')">停止</button>
+      </div>
+    </header>
 
-      <section class="side-card flat-card">
-        <h3>运行状态</h3>
-        <div class="compact-status">
-          <div class="line"><span>窗口</span><strong id="boundWindow">未绑定</strong></div>
-          <div class="line"><span>任务</span><strong id="currentTask">空闲</strong></div>
-          <div class="line"><span>状态</span><strong id="running">否</strong></div>
-          <div class="line"><span>当前场景</span><strong id="stat_scene">长安城郊外</strong></div>
-          <div class="line"><span>最近异常</span><strong id="stat_error">无</strong></div>
-          <div class="line"><span>运行时长</span><strong id="stat_runtime">00:12:36</strong></div>
-          <div class="line"><span>已完成轮数</span><strong id="stat_completed">3</strong></div>
-        </div>
-      </section>
+    <main class="studio-main">
+      <aside class="panel task-panel">
+        <div class="panel-title">任务列表</div>
+        <div class="task-list" id="task_list"></div>
+      </aside>
 
-      <section class="side-card flat-card">
-        <h3>快捷操作</h3>
-        <div class="button-group">
-          <button onclick="act('bind')">绑定游戏窗口</button>
-          <button class="secondary" onclick="act('pause')">暂停</button>
-          <button class="danger" onclick="act('stop')">停止</button>
-        </div>
-      </section>
-    </aside>
-
-    <main class="content">
-      <section class="top-cards three-up">
-        <div class="card">
-          <h2>任务面板</h2>
-          <div class="button-group">
-            <button onclick="act('start-dig')">启动自动打图</button>
-            <button onclick="act('start-master')">启动自动师门</button>
-            <button onclick="act('start-ghost')">启动自动抓鬼（队长）</button>
+      <section class="center-zone">
+        <div class="panel flow-panel">
+          <div class="panel-title panel-split">
+            <span>任务步骤</span>
+            <span class="status-mini">窗口：<strong id="boundWindow">未绑定</strong></span>
+          </div>
+          <div class="flow-table-wrap">
+            <table class="flow-table">
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>类型</th>
+                  <th>步骤名</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody id="step_table"></tbody>
+            </table>
           </div>
         </div>
 
-        <div class="card">
-          <h2>巡线与战斗模拟</h2>
-          <p>当前版本先演示流程和交互，后续再接真实识图与动作执行。</p>
-          <div class="button-group compact">
-            <button class="secondary" onclick="act('simulate-route')">模拟巡线</button>
-            <button class="secondary" onclick="act('simulate-battle')">模拟战斗回链</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>识别调试速览</h2>
-          <div class="debug-box compact-box" id="vision_debug"></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2>配置中心</h2>
-        <div class="section-grid two-col">
-          <section class="panel">
-            <h3>基础设置</h3>
-            <div class="form-grid two-col">
-              <label>窗口标题关键词<input id="title_keyword" /></label>
-              <label>巡线模板<input id="route_profile" /></label>
-              <label>停止热键<input id="stop_hotkey" /></label>
-              <label>暂停热键<input id="pause_hotkey" /></label>
-              <label>超时秒数<input id="timeout_seconds" type="number" min="10" /></label>
+        <div class="bottom-grid">
+          <div class="panel component-panel">
+            <div class="panel-title">步骤组件</div>
+            <div class="component-grid">
+              <button class="comp-btn">图片识别</button>
+              <button class="comp-btn">多点找色</button>
+              <button class="comp-btn">OCR识别</button>
+              <button class="comp-btn">鼠标点击</button>
+              <button class="comp-btn">键盘输入</button>
+              <button class="comp-btn">延迟时间</button>
+              <button class="comp-btn">变量赋值</button>
+              <button class="comp-btn">条件判断</button>
+              <button class="comp-btn">循环流程</button>
+              <button class="comp-btn">跳转步骤</button>
+              <button class="comp-btn">日志输出</button>
+              <button class="comp-btn">外部接口</button>
             </div>
-          </section>
-          <section class="panel">
-            <h3>任务配置</h3>
-            <div class="task-config-grid">
-              <div class="task-config-card">
-                <div class="task-config-title">自动打图</div>
-                <label>轮数<input id="dig_rounds" type="number" min="1" /></label>
-                <label class="toggle-line"><input id="dig_enabled" type="checkbox" /> 启用自动打图</label>
-              </div>
-              <div class="task-config-card">
-                <div class="task-config-title">自动师门</div>
-                <label>轮数<input id="master_rounds" type="number" min="1" /></label>
-                <label class="toggle-line"><input id="master_enabled" type="checkbox" /> 启用自动师门</label>
-              </div>
-              <div class="task-config-card">
-                <div class="task-config-title">自动抓鬼（队长）</div>
-                <label>轮数<input id="ghost_rounds" type="number" min="1" /></label>
-                <label class="toggle-line"><input id="ghost_enabled" type="checkbox" /> 启用自动抓鬼（队长）</label>
-              </div>
+          </div>
+
+          <div class="panel log-panel">
+            <div class="panel-title panel-split">
+              <span>运行日志</span>
+              <span class="status-mini">状态：<strong id="running">否</strong></span>
             </div>
-          </section>
-        </div>
-        <div class="button-row right top-gap">
-          <button onclick="saveConfig()">保存参数</button>
-        </div>
-      </section>
-
-      <section class="section-grid three-col top-gap">
-        <div class="card">
-          <h2>OCR 调试区</h2>
-          <div class="form-grid two-col compact-grid">
-            <label>OCR X<input id="ocr_x" type="number" /></label>
-            <label>OCR Y<input id="ocr_y" type="number" /></label>
-            <label>OCR W<input id="ocr_w" type="number" /></label>
-            <label>OCR H<input id="ocr_h" type="number" /></label>
-          </div>
-          <div class="debug-box tall" id="ocr_debug"></div>
-        </div>
-
-        <div class="card">
-          <h2>路线管理区</h2>
-          <div class="debug-box tall" id="route_debug"></div>
-        </div>
-
-        <div class="card">
-          <h2>画面预留区</h2>
-          <div class="canvas-placeholder">
-            <div class="canvas-title">后续接入真实游戏截图预览</div>
-            <div class="canvas-sub">当前版本仅预留显示区域</div>
+            <pre id="logs"></pre>
           </div>
         </div>
       </section>
 
-      <section class="card top-gap">
-        <h2>运行日志</h2>
-        <pre id="logs"></pre>
-      </section>
+      <aside class="panel prop-panel">
+        <div class="panel-title">步骤属性</div>
+        <div class="prop-section">
+          <div class="prop-group-title">运行状态</div>
+          <div class="prop-line"><span>当前任务</span><strong id="currentTask">空闲</strong></div>
+          <div class="prop-line"><span>当前场景</span><strong id="stat_scene">长安城郊外</strong></div>
+          <div class="prop-line"><span>最近异常</span><strong id="stat_error">无</strong></div>
+          <div class="prop-line"><span>运行时长</span><strong id="stat_runtime">00:00:00</strong></div>
+          <div class="prop-line"><span>完成轮数</span><strong id="stat_completed">0</strong></div>
+        </div>
+
+        <div class="prop-section">
+          <div class="prop-group-title">基础设置</div>
+          <label>窗口标题关键词<input id="title_keyword" /></label>
+          <label>巡线模板<input id="route_profile" /></label>
+          <label>停止热键<input id="stop_hotkey" /></label>
+          <label>暂停热键<input id="pause_hotkey" /></label>
+          <label>超时秒数<input id="timeout_seconds" type="number" min="10" /></label>
+        </div>
+
+        <div class="prop-section">
+          <div class="prop-group-title">OCR 区域</div>
+          <div class="mini-grid">
+            <label>X<input id="ocr_x" type="number" /></label>
+            <label>Y<input id="ocr_y" type="number" /></label>
+            <label>W<input id="ocr_w" type="number" /></label>
+            <label>H<input id="ocr_h" type="number" /></label>
+          </div>
+          <div class="debug-mini" id="ocr_debug"></div>
+        </div>
+
+        <div class="prop-section">
+          <div class="prop-group-title">任务配置</div>
+          <label class="chk"><input id="dig_enabled" type="checkbox" /> 自动打图</label>
+          <label>打图轮数<input id="dig_rounds" type="number" min="1" /></label>
+          <label class="chk"><input id="master_enabled" type="checkbox" /> 自动师门</label>
+          <label>师门轮数<input id="master_rounds" type="number" min="1" /></label>
+          <label class="chk"><input id="ghost_enabled" type="checkbox" /> 自动抓鬼（队长）</label>
+          <label>抓鬼轮数<input id="ghost_rounds" type="number" min="1" /></label>
+        </div>
+
+        <div class="prop-section">
+          <div class="prop-group-title">识别调试</div>
+          <div class="debug-mini" id="vision_debug"></div>
+          <div class="debug-mini" id="route_debug"></div>
+        </div>
+
+        <div class="prop-actions">
+          <button class="tb-btn primary wide" onclick="saveConfig()">保存参数</button>
+        </div>
+      </aside>
     </main>
   </div>
   <script src="app.js"></script>

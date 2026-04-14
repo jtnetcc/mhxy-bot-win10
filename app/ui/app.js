@@ -1,3 +1,21 @@
+const DEMO_TASKS = [
+  { id: 1, name: '自动打图', enabled: true, active: true },
+  { id: 2, name: '自动师门', enabled: true, active: false },
+  { id: 3, name: '自动抓鬼（队长）', enabled: false, active: false },
+];
+
+const DEMO_STEPS = [
+  { type: '窗口', name: '绑定游戏窗口', desc: '查找标题包含“梦幻西游”的主窗口' },
+  { type: '图像', name: '识别主界面元素', desc: '识别背包 / 地图 / 任务栏 / 挂机按钮' },
+  { type: 'OCR', name: '读取藏宝图任务', desc: 'OCR 提取藏宝图目标场景文本' },
+  { type: '流程', name: '解析目标场景', desc: '从 OCR 文本提取地图名并归一化' },
+  { type: '路线', name: '规划巡线路径', desc: '根据配置模板装载 waypoint 列表' },
+  { type: '鼠标', name: '移动至目标点', desc: '按场景路径模拟移动到挖图点附近' },
+  { type: '动作', name: '执行挖图动作', desc: '点击藏宝图并触发挖图流程' },
+  { type: '判断', name: '奖励/战斗分流', desc: '识别是否进入战斗或直接领奖' },
+  { type: '循环', name: '回到下一轮', desc: '准备执行下一次打图循环' },
+];
+
 async function apiGetStatus() {
   if (window.__TAURI__?.core?.invoke) {
     return await window.__TAURI__.core.invoke('get_status');
@@ -24,6 +42,28 @@ async function apiSaveConfig(payload) {
     body: JSON.stringify(payload),
   });
   return await res.json();
+}
+
+function renderTasks() {
+  const el = document.getElementById('task_list');
+  el.innerHTML = DEMO_TASKS.map(t => `
+    <div class="task-item ${t.active ? 'active' : ''}">
+      <input type="checkbox" ${t.enabled ? 'checked' : ''} />
+      <div>${t.name}</div>
+    </div>
+  `).join('');
+}
+
+function renderSteps() {
+  const el = document.getElementById('step_table');
+  el.innerHTML = DEMO_STEPS.map((s, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${s.type}</td>
+      <td>${s.name}</td>
+      <td>${s.desc}</td>
+    </tr>
+  `).join('');
 }
 
 function fillConfig(cfg) {
@@ -56,7 +96,7 @@ function fillDebug(debug) {
   document.getElementById('stat_runtime').textContent = debug.stats.runtime;
   document.getElementById('ocr_debug').textContent = [
     'OCR 文本: ' + debug.vision.ocr_text,
-    'OCR 区域: 使用配置中的 task_text_region',
+    'OCR 区域: task_text_region',
   ].join('\n');
   document.getElementById('route_debug').textContent = [
     '巡线模板: ' + debug.route.profile,
@@ -82,9 +122,7 @@ async function act(name) {
 
 async function saveConfig() {
   const payload = {
-    window: {
-      title_keyword: document.getElementById('title_keyword').value,
-    },
+    window: { title_keyword: document.getElementById('title_keyword').value },
     tasks: {
       dig_treasure: {
         enabled: document.getElementById('dig_enabled').checked,
@@ -99,9 +137,7 @@ async function saveConfig() {
         max_rounds: Number(document.getElementById('ghost_rounds').value || 20),
       }
     },
-    navigation: {
-      route_profile: document.getElementById('route_profile').value,
-    },
+    navigation: { route_profile: document.getElementById('route_profile').value },
     ocr: {
       task_text_region: [
         Number(document.getElementById('ocr_x').value || 0),
@@ -120,5 +156,7 @@ async function saveConfig() {
   await refresh();
 }
 
+renderTasks();
+renderSteps();
 refresh();
 setInterval(refresh, 2000);
