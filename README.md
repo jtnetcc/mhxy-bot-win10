@@ -19,6 +19,14 @@ Win10 单开版梦幻西游端游自动化项目骨架。
 - 安装版：GitHub Actions 产出 `mhxy-bot-win10-setup.exe`
 - 安装器基于 Inno Setup，支持开始菜单、桌面快捷方式、安装目录
 
+## Tauri 桌面化（进行中）
+- 已新增 `src-tauri/` 工程骨架
+- 前端已兼容 Tauri `invoke` 调用
+- 当前仓库同时保留：
+  - Python 本地原型模式
+  - Tauri 桌面壳迁移方向
+- 后续需要在带 Rust 工具链的环境完成真正的 Tauri 构建与打包
+
 ## 目录说明
 - `app/`：主程序代码
 - `config/`：配置文件

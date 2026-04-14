@@ -40,6 +40,17 @@
   - 便携版 `mhxy-bot-win10.exe`
   - 安装版 `mhxy-bot-win10-setup.exe`
 
+## Tauri 迁移现状
+- 已新增 `src-tauri/` 目录，作为桌面壳迁移起点
+- UI 层 `app/ui/app.js` 已支持：
+  - 浏览器原型模式（HTTP API）
+  - Tauri 桌面模式（`window.__TAURI__.core.invoke`）
+- 当前主机缺少 Rust / cargo，尚未在本机完成 Tauri 编译验证
+- 下一步应补：
+  1. Windows Rust toolchain
+  2. Tauri build workflow
+  3. 图标/签名/安装器配置
+
 ## 进入真实接入前需要准备
 - Win10 游戏客户端环境
 - 固定分辨率
