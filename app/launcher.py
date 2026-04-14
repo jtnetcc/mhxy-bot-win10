@@ -54,13 +54,15 @@ class Handler(SimpleHTTPRequestHandler):
             debug = {
                 'window': {'title': STATE['boundWindow'], 'mode': 'mock'},
                 'vision': {
-                    'detections': ['背包按钮', '任务栏', '挂机按钮'],
-                    'ocr_text': '去长安城郊外挖宝',
-                    'target_map': '长安城郊外'
+                    'profile': TEMPLATE_SERVICE.profile,
+                    'detections': [d['name'] for d in TEMPLATE_SERVICE.detect_main_ui()['detections']],
+                    'ocr_text': CONFIG['ocr']['mock_text'],
+                    'target_map': CONFIG['ocr']['mock_target_map']
                 },
                 'route': {
                     'profile': CONFIG['navigation']['route_profile'],
-                    'steps': ['打开地图', '切换到目标场景', '执行路线模板 default', '到达挖图点附近']
+                    'maps': ROUTE_ENGINE.get_available_maps(),
+                    'steps': ROUTE_ENGINE.plan_dig_route(CONFIG['ocr']['mock_target_map'])['steps']
                 },
                 'stats': {
                     'completed_rounds': 3,
@@ -109,8 +111,10 @@ class Handler(SimpleHTTPRequestHandler):
                 STATE['running'] = True
                 STATE['currentTask'] = '自动打图'
                 STATE['logs'].append(f'[{now}] [task] 启动 自动打图（预演）')
-                for line in TASKS.get('dig_treasure').run_preview():
+                dig_task = TASKS.get('dig_treasure')
+                for line in dig_task.run_preview():
                     STATE['logs'].append(line)
+                STATE['digState'] = dig_task.get_debug_snapshot()
             elif action == 'start-master':
                 STATE['running'] = True
                 STATE['currentTask'] = '自动师门'

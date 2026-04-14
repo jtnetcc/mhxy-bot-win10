@@ -1,6 +1,6 @@
 app:
   name: mhxy-bot-win10
-  version: 0.1.0-prototype
+  version: 0.3.0-dev
   mode: prototype
 window:
   title_keyword: 梦幻西游
@@ -12,6 +12,7 @@ tasks:
   dig_treasure:
     enabled: true
     max_rounds: 20
+    route_profile: default
   master_task:
     enabled: true
     max_rounds: 20
@@ -22,12 +23,20 @@ navigation:
   mode: route-template
   route_profile: default
 ocr:
-  provider: planned
+  provider: mock
   language: zh-CN
   task_text_region: [0, 0, 300, 120]
+  mock_text: 去长安城郊外挖宝
+  mock_target_map: 长安城郊外
+  dig_scene_aliases:
+    长安城郊外: [长安郊外, 郊外]
+    江南野外: [江南, 江南野]
 templates:
   profile: dig-ui.example
 safety:
   stop_hotkey: F8
   pause_hotkey: F9
   timeout_seconds: 120
+runtime:
+  log_dir: logs
+  screenshot_dir: screenshots

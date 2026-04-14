@@ -1,16 +1,27 @@
 name: default
 maps:
-  - name: 长安城
-    waypoints:
-      - [120, 210]
-      - [188, 240]
-      - [260, 310]
-  - name: 长安城郊外
+  长安城郊外:
+    aliases: [长安郊外, 郊外]
+    travel_steps:
+      - 从当前场景打开地图
+      - 切换到长安城郊外
+      - 靠近藏宝图坐标所在区域
     waypoints:
       - [88, 166]
       - [140, 196]
       - [210, 248]
+  江南野外:
+    aliases: [江南, 江南野]
+    travel_steps:
+      - 从当前场景打开地图
+      - 切换到江南野外
+      - 沿预设路线逼近目标点
+    waypoints:
+      - [102, 208]
+      - [166, 255]
+      - [228, 301]
 strategy:
   arrive_threshold: 18
   retry_on_stuck: 3
   step_delay_ms: 500
+  repath_on_fail: true

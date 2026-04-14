@@ -1,16 +1,30 @@
 templates:
   bag_button:
+    label: 背包按钮
     path: assets/templates/dig/bag_button.png
     threshold: 0.92
   task_bar:
+    label: 任务栏
     path: assets/templates/dig/task_bar.png
     threshold: 0.90
   map_button:
+    label: 地图按钮
     path: assets/templates/dig/map_button.png
     threshold: 0.90
+  hangup_button:
+    label: 挂机按钮
+    path: assets/templates/common/hangup_button.png
+    threshold: 0.88
   dig_action:
+    label: 挖图动作按钮
     path: assets/templates/dig/dig_action.png
     threshold: 0.88
   battle_end:
+    label: 战斗结束
     path: assets/templates/common/battle_end.png
     threshold: 0.90
+meta:
+  profile: dig-ui.example
+  notes:
+    - 当前为模板清单示例，真实接图后补齐 assets 对应图片
+    - threshold 先给经验值，后续按截图实测回调
