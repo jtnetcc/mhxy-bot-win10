@@ -1,5 +1,5 @@
 from app.core.logger import log_line
-from app.tasks.task_blueprints import TASK_BLUEPRINTS
+from app.tasks.task_blueprints import get_task_blueprint
 
 
 class MasterTask:
@@ -9,7 +9,6 @@ class MasterTask:
         self.template_service = template_service
         self.route_engine = route_engine
         self.ocr_service = ocr_service
-        self.steps = TASK_BLUEPRINTS['master_task']['steps']
         self.last_snapshot = {'task': 'master_task', 'current': 'idle', 'history': []}
 
     def run_preview(self):
@@ -41,4 +40,4 @@ class MasterTask:
         return self.last_snapshot
 
     def get_step_blueprint(self):
-        return self.steps
+        return get_task_blueprint('master_task')['steps']
