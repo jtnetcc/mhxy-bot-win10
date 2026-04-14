@@ -17,25 +17,51 @@ from app.vision.template_service import TemplateService
 from app.navigation.route_engine import RouteEngine
 from app.core.task_registry import TaskRegistry
 from app.core.pathing import UI_DIR
+from app.tasks.task_blueprints import TASK_BLUEPRINTS
 
-BASE_DIR = Path(__file__).resolve().parent
 CONFIG = load_config()
 WINDOW_SERVICE = WindowService(CONFIG)
 TEMPLATE_SERVICE = TemplateService(CONFIG)
 ROUTE_ENGINE = RouteEngine(CONFIG)
 TASKS = TaskRegistry(CONFIG, WINDOW_SERVICE, TEMPLATE_SERVICE, ROUTE_ENGINE)
 
+TASK_ORDER = ['dig_treasure', 'master_task', 'ghost_hunt_leader']
+
 STATE = {
     'app': 'mhxy-bot-win10',
-    'version': '0.2.0-dig-preview',
+    'version': '0.4.1-studio-preview',
     'boundWindow': '未绑定',
     'currentTask': '空闲',
+    'currentTaskKey': 'dig_treasure',
     'running': False,
     'logs': [
-        '[init] dig preview ready',
-        '[hint] 当前版本已接入自动打图任务底座（mock 接口层）',
+        '[init] studio preview ready',
+        '[hint] 当前版本已接入自动打图 / 自动师门 / 自动抓鬼 三条任务骨架',
     ],
+    'taskSnapshots': {},
 }
+
+
+def get_task_list_payload():
+    items = []
+    for key in TASK_ORDER:
+        task_cfg = CONFIG['tasks'][key]
+        bp = TASK_BLUEPRINTS[key]
+        items.append({
+            'key': key,
+            'label': bp['label'],
+            'enabled': task_cfg.get('enabled', True),
+            'active': key == STATE['currentTaskKey'],
+            'stepCount': len(bp['steps']),
+        })
+    return items
+
+
+def get_current_steps():
+    key = STATE['currentTaskKey']
+    task = TASKS.get(key)
+    return task.get_step_blueprint()
+
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -51,6 +77,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/api/status':
+            current_snapshot = STATE['taskSnapshots'].get(STATE['currentTaskKey'], {})
             debug = {
                 'window': {'title': STATE['boundWindow'], 'mode': 'mock'},
                 'vision': {
@@ -69,9 +96,16 @@ class Handler(SimpleHTTPRequestHandler):
                     'current_scene': '长安城郊外',
                     'recent_error': '无',
                     'runtime': '00:12:36'
-                }
+                },
+                'taskState': current_snapshot,
             }
-            return self._json({**STATE, 'config': CONFIG, 'debug': debug})
+            return self._json({
+                **STATE,
+                'config': CONFIG,
+                'debug': debug,
+                'taskList': get_task_list_payload(),
+                'steps': get_current_steps(),
+            })
         return super().do_GET()
 
     def do_POST(self):
@@ -79,27 +113,54 @@ class Handler(SimpleHTTPRequestHandler):
             length = int(self.headers.get('Content-Length', '0'))
             body = self.rfile.read(length)
             data = json.loads(body.decode('utf-8'))
-            CONFIG['window']['title_keyword'] = data.get('title_keyword', CONFIG['window']['title_keyword'])
-            CONFIG['tasks']['dig_treasure']['enabled'] = bool(data.get('dig_enabled', True))
-            CONFIG['tasks']['dig_treasure']['max_rounds'] = int(data.get('dig_rounds', 20))
-            CONFIG['tasks']['master_task']['enabled'] = bool(data.get('master_enabled', True))
-            CONFIG['tasks']['master_task']['max_rounds'] = int(data.get('master_rounds', 20))
-            CONFIG['tasks']['ghost_hunt_leader']['enabled'] = bool(data.get('ghost_enabled', True))
-            CONFIG['tasks']['ghost_hunt_leader']['max_rounds'] = int(data.get('ghost_rounds', 20))
-            CONFIG['safety']['stop_hotkey'] = data.get('stop_hotkey', CONFIG['safety']['stop_hotkey'])
-            CONFIG['safety']['pause_hotkey'] = data.get('pause_hotkey', CONFIG['safety']['pause_hotkey'])
-            CONFIG['safety']['timeout_seconds'] = int(data.get('timeout_seconds', CONFIG['safety']['timeout_seconds']))
-            CONFIG['navigation']['route_profile'] = data.get('route_profile', CONFIG['navigation']['route_profile'])
-            CONFIG['ocr']['task_text_region'] = [
-                int(data.get('ocr_x', CONFIG['ocr']['task_text_region'][0])),
-                int(data.get('ocr_y', CONFIG['ocr']['task_text_region'][1])),
-                int(data.get('ocr_w', CONFIG['ocr']['task_text_region'][2])),
-                int(data.get('ocr_h', CONFIG['ocr']['task_text_region'][3])),
-            ]
+
+            if 'window' in data:
+                CONFIG['window']['title_keyword'] = data['window'].get('title_keyword', CONFIG['window']['title_keyword'])
+            else:
+                CONFIG['window']['title_keyword'] = data.get('title_keyword', CONFIG['window']['title_keyword'])
+
+            if 'tasks' in data:
+                for key in ['dig_treasure', 'master_task', 'ghost_hunt_leader']:
+                    if key in data['tasks']:
+                        CONFIG['tasks'][key]['enabled'] = bool(data['tasks'][key].get('enabled', CONFIG['tasks'][key]['enabled']))
+                        CONFIG['tasks'][key]['max_rounds'] = int(data['tasks'][key].get('max_rounds', CONFIG['tasks'][key]['max_rounds']))
+            else:
+                CONFIG['tasks']['dig_treasure']['enabled'] = bool(data.get('dig_enabled', True))
+                CONFIG['tasks']['dig_treasure']['max_rounds'] = int(data.get('dig_rounds', 20))
+                CONFIG['tasks']['master_task']['enabled'] = bool(data.get('master_enabled', True))
+                CONFIG['tasks']['master_task']['max_rounds'] = int(data.get('master_rounds', 20))
+                CONFIG['tasks']['ghost_hunt_leader']['enabled'] = bool(data.get('ghost_enabled', True))
+                CONFIG['tasks']['ghost_hunt_leader']['max_rounds'] = int(data.get('ghost_rounds', 20))
+
+            if 'safety' in data:
+                CONFIG['safety']['stop_hotkey'] = data['safety'].get('stop_hotkey', CONFIG['safety']['stop_hotkey'])
+                CONFIG['safety']['pause_hotkey'] = data['safety'].get('pause_hotkey', CONFIG['safety']['pause_hotkey'])
+                CONFIG['safety']['timeout_seconds'] = int(data['safety'].get('timeout_seconds', CONFIG['safety']['timeout_seconds']))
+            else:
+                CONFIG['safety']['stop_hotkey'] = data.get('stop_hotkey', CONFIG['safety']['stop_hotkey'])
+                CONFIG['safety']['pause_hotkey'] = data.get('pause_hotkey', CONFIG['safety']['pause_hotkey'])
+                CONFIG['safety']['timeout_seconds'] = int(data.get('timeout_seconds', CONFIG['safety']['timeout_seconds']))
+
+            if 'navigation' in data:
+                CONFIG['navigation']['route_profile'] = data['navigation'].get('route_profile', CONFIG['navigation']['route_profile'])
+            else:
+                CONFIG['navigation']['route_profile'] = data.get('route_profile', CONFIG['navigation']['route_profile'])
+
+            if 'ocr' in data and 'task_text_region' in data['ocr']:
+                CONFIG['ocr']['task_text_region'] = [int(x) for x in data['ocr']['task_text_region']]
+            else:
+                CONFIG['ocr']['task_text_region'] = [
+                    int(data.get('ocr_x', CONFIG['ocr']['task_text_region'][0])),
+                    int(data.get('ocr_y', CONFIG['ocr']['task_text_region'][1])),
+                    int(data.get('ocr_w', CONFIG['ocr']['task_text_region'][2])),
+                    int(data.get('ocr_h', CONFIG['ocr']['task_text_region'][3])),
+                ]
+
             save_config(CONFIG)
-            STATE['logs'].append(f"[{time.strftime('%H:%M:%S')}] [config] 已保存可视化参数")
-            STATE['logs'] = STATE['logs'][-20:]
-            return self._json({'ok': True, 'config': CONFIG})
+            STATE['logs'].append(f"[{time.strftime('%H:%M:%S')}] [config] 已保存参数")
+            STATE['logs'] = STATE['logs'][-40:]
+            return self._json({'ok': True, 'config': CONFIG, 'taskList': get_task_list_payload()})
+
         if self.path.startswith('/api/action/'):
             action = self.path.split('/api/action/', 1)[1]
             now = time.strftime('%H:%M:%S')
@@ -110,23 +171,36 @@ class Handler(SimpleHTTPRequestHandler):
             elif action == 'start-dig':
                 STATE['running'] = True
                 STATE['currentTask'] = '自动打图'
+                STATE['currentTaskKey'] = 'dig_treasure'
                 STATE['logs'].append(f'[{now}] [task] 启动 自动打图（预演）')
-                dig_task = TASKS.get('dig_treasure')
-                for line in dig_task.run_preview():
+                task = TASKS.get('dig_treasure')
+                for line in task.run_preview():
                     STATE['logs'].append(line)
-                STATE['digState'] = dig_task.get_debug_snapshot()
+                STATE['taskSnapshots']['dig_treasure'] = task.get_debug_snapshot()
             elif action == 'start-master':
                 STATE['running'] = True
                 STATE['currentTask'] = '自动师门'
+                STATE['currentTaskKey'] = 'master_task'
                 STATE['logs'].append(f'[{now}] [task] 启动 自动师门（预演）')
-                for line in TASKS.get('master_task').run_preview():
+                task = TASKS.get('master_task')
+                for line in task.run_preview():
                     STATE['logs'].append(line)
+                STATE['taskSnapshots']['master_task'] = task.get_debug_snapshot()
             elif action == 'start-ghost':
                 STATE['running'] = True
                 STATE['currentTask'] = '自动抓鬼（队长）'
+                STATE['currentTaskKey'] = 'ghost_hunt_leader'
                 STATE['logs'].append(f'[{now}] [task] 启动 自动抓鬼（队长）（预演）')
-                for line in TASKS.get('ghost_hunt_leader').run_preview():
+                task = TASKS.get('ghost_hunt_leader')
+                for line in task.run_preview():
                     STATE['logs'].append(line)
+                STATE['taskSnapshots']['ghost_hunt_leader'] = task.get_debug_snapshot()
+            elif action.startswith('select-task:'):
+                key = action.split(':', 1)[1]
+                if key in TASK_ORDER:
+                    STATE['currentTaskKey'] = key
+                    STATE['currentTask'] = TASK_BLUEPRINTS[key]['label']
+                    STATE['logs'].append(f'[{now}] [ui] 切换任务视图: {TASK_BLUEPRINTS[key]["label"]}')
             elif action == 'pause':
                 STATE['running'] = False
                 STATE['logs'].append(f'[{now}] [control] 已暂停')
@@ -134,15 +208,12 @@ class Handler(SimpleHTTPRequestHandler):
                 STATE['running'] = False
                 STATE['currentTask'] = '空闲'
                 STATE['logs'].append(f'[{now}] [control] 已停止')
-            elif action == 'simulate-route':
-                STATE['logs'].append(f'[{now}] [route] 执行路线模板：长安城 -> 酒店 -> 郊外 -> 任务点')
-            elif action == 'simulate-battle':
-                STATE['logs'].append(f'[{now}] [battle] 检测到战斗结束，准备回链')
             else:
                 return self._json({'error': 'unknown action'}, 404)
-            STATE['logs'] = STATE['logs'][-20:]
-            return self._json({'ok': True, 'state': STATE})
+            STATE['logs'] = STATE['logs'][-40:]
+            return self._json({'ok': True, 'state': STATE, 'taskList': get_task_list_payload(), 'steps': get_current_steps()})
         return self._json({'error': 'not found'}, 404)
+
 
 if __name__ == '__main__':
     host = '127.0.0.1'

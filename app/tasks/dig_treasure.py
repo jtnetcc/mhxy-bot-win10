@@ -1,5 +1,6 @@
 from app.core.logger import log_line
 from app.tasks.dig_state_machine import DigState, DigStateMachine
+from app.tasks.task_blueprints import TASK_BLUEPRINTS
 from app.vision.ocr_service import OCRService
 
 
@@ -11,6 +12,7 @@ class DigTreasureTask:
         self.route_engine = route_engine
         self.ocr_service = OCRService(config)
         self.state_machine = DigStateMachine()
+        self.steps = TASK_BLUEPRINTS['dig_treasure']['steps']
 
     def _step(self, next_state: DigState, reason: str, logs: list[str]):
         event = self.state_machine.transition(next_state, reason)
@@ -63,4 +65,9 @@ class DigTreasureTask:
         return logs
 
     def get_debug_snapshot(self):
-        return self.state_machine.snapshot()
+        snap = self.state_machine.snapshot()
+        snap['task'] = 'dig_treasure'
+        return snap
+
+    def get_step_blueprint(self):
+        return self.steps
