@@ -9,18 +9,14 @@
 <body>
   <div class="studio-shell">
     <header class="studio-toolbar">
-      <div class="toolbar-left">
-        <div class="app-title">梦幻西游脚本工坊 - 预演版</div>
-        <div class="toolbar-group">
-          <button class="tb-btn" onclick="addStep('动作')">新增步骤</button>
-          <button class="tb-btn" onclick="moveStep('up')">上移</button>
-          <button class="tb-btn" onclick="moveStep('down')">下移</button>
-          <button class="tb-btn" onclick="deleteStep()">删除步骤</button>
-          <button class="tb-btn primary" onclick="saveStepEditor()">保存步骤</button>
-          <button class="tb-btn">变量</button>
-        </div>
-      </div>
-      <div class="toolbar-right">
+      <div class="toolbar-brand">梦幻西游脚本工坊 · 可编辑预演版</div>
+      <div class="toolbar-group toolbar-editor-actions">
+        <button class="tb-btn" onclick="addStep('动作')">新增步骤</button>
+        <button class="tb-btn" onclick="moveStep('up')">上移</button>
+        <button class="tb-btn" onclick="moveStep('down')">下移</button>
+        <button class="tb-btn" onclick="deleteStep()">删除步骤</button>
+        <button class="tb-btn primary" onclick="saveStepEditor()">保存步骤</button>
+        <button class="tb-btn">变量</button>
         <button class="tb-btn primary" onclick="act('bind')">绑定窗口</button>
         <button class="tb-btn primary" onclick="act(currentRunAction())">运行</button>
         <button class="tb-btn" onclick="act('pause')">暂停</button>
@@ -86,7 +82,7 @@
 
       <aside class="panel prop-panel">
         <div class="panel-title">步骤属性</div>
-        <div class="prop-section">
+        <div class="prop-section compact-section">
           <div class="prop-group-title">运行状态</div>
           <div class="prop-line"><span>当前任务</span><strong id="currentTask">空闲</strong></div>
           <div class="prop-line"><span>当前场景</span><strong id="stat_scene">长安城郊外</strong></div>
@@ -95,7 +91,7 @@
           <div class="prop-line"><span>完成轮数</span><strong id="stat_completed">0</strong></div>
         </div>
 
-        <div class="prop-section">
+        <div class="prop-section compact-section">
           <div class="prop-group-title">基础设置</div>
           <label>窗口标题关键词<input id="title_keyword" /></label>
           <label>巡线模板<input id="route_profile" /></label>
@@ -104,7 +100,7 @@
           <label>超时秒数<input id="timeout_seconds" type="number" min="10" /></label>
         </div>
 
-        <div class="prop-section">
+        <div class="prop-section editor-section">
           <div class="prop-group-title">当前步骤详情</div>
           <div class="prop-line"><span>步骤序号</span><strong id="selected_step_index">-</strong></div>
           <div class="prop-line"><span>步骤类型</span><strong id="selected_step_type">-</strong></div>
@@ -116,7 +112,7 @@
           <div class="settings-editor" id="selected_step_settings"></div>
         </div>
 
-        <div class="prop-section">
+        <div class="prop-section compact-section">
           <div class="prop-group-title">OCR 区域</div>
           <div class="mini-grid">
             <label>X<input id="ocr_x" type="number" /></label>
@@ -127,7 +123,7 @@
           <div class="debug-mini" id="ocr_debug"></div>
         </div>
 
-        <div class="prop-section">
+        <div class="prop-section compact-section">
           <div class="prop-group-title">任务配置</div>
           <label class="chk"><input id="dig_enabled" type="checkbox" /> 自动打图</label>
           <label>打图轮数<input id="dig_rounds" type="number" min="1" /></label>
@@ -137,7 +133,7 @@
           <label>抓鬼轮数<input id="ghost_rounds" type="number" min="1" /></label>
         </div>
 
-        <div class="prop-section">
+        <div class="prop-section compact-section">
           <div class="prop-group-title">识别调试</div>
           <div class="debug-mini" id="vision_debug"></div>
           <div class="debug-mini" id="route_debug"></div>
