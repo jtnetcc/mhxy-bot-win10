@@ -25,10 +25,11 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
+    "targets": ["nsis", "dmg"],
     "icon": [
       "icons/app-icon.png",
-      "icons/app-icon.ico"
+      "icons/app-icon.ico",
+      "icons/app-icon.icns"
     ],
     "windows": {
       "nsis": {

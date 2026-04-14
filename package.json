@@ -5,6 +5,7 @@
   "description": "Dream Journey to the West Win10 bot prototype with Tauri desktop shell.",
   "scripts": {
     "prototype": "python app/launcher.py",
+    "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"
   },
