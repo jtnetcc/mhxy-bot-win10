@@ -1,3 +1,6 @@
+let CURRENT_DATA = null;
+let SELECTED_STEP_INDEX = 0;
+
 async function apiGetStatus() {
   if (window.__TAURI__?.core?.invoke) {
     return await window.__TAURI__.core.invoke('get_status');
@@ -26,6 +29,15 @@ async function apiSaveConfig(payload) {
   return await res.json();
 }
 
+function currentRunAction() {
+  const key = CURRENT_DATA?.currentTaskKey || 'dig_treasure';
+  return {
+    dig_treasure: 'start-dig',
+    master_task: 'start-master',
+    ghost_hunt_leader: 'start-ghost',
+  }[key] || 'start-dig';
+}
+
 function renderTasks(taskList = []) {
   const el = document.getElementById('task_list');
   if (!el) return;
@@ -44,12 +56,30 @@ function renderSteps(steps = []) {
   const el = document.getElementById('step_table');
   if (!el) return;
   el.innerHTML = steps.map((s, i) => `
-    <tr>
+    <tr class="${i === SELECTED_STEP_INDEX ? 'active-step' : ''}" onclick="selectStep(${i})">
       <td>${i + 1}</td>
       <td>${s.type}</td>
       <td>${s.name}</td>
       <td>${s.desc}</td>
     </tr>
+  `).join('');
+}
+
+function renderSelectedStep(step, index) {
+  document.getElementById('selected_step_index').textContent = step ? String(index + 1) : '-';
+  document.getElementById('selected_step_type').textContent = step?.type || '-';
+  document.getElementById('selected_step_name').textContent = step?.name || '-';
+  document.getElementById('selected_step_desc').textContent = step?.desc || '请选择一个步骤';
+  const settingsEl = document.getElementById('selected_step_settings');
+  if (!step?.settings?.length) {
+    settingsEl.innerHTML = '<div class="debug-mini">当前步骤暂无详细配置</div>';
+    return;
+  }
+  settingsEl.innerHTML = step.settings.map(item => `
+    <div class="setting-row">
+      <span>${item.label}</span>
+      <strong>${item.value}</strong>
+    </div>
   `).join('');
 }
 
@@ -95,6 +125,9 @@ function fillDebug(debug) {
 
 async function refresh() {
   const data = await apiGetStatus();
+  CURRENT_DATA = data;
+  const steps = data.steps || [];
+  if (SELECTED_STEP_INDEX >= steps.length) SELECTED_STEP_INDEX = 0;
   document.getElementById('boundWindow').textContent = data.boundWindow;
   document.getElementById('currentTask').textContent = data.currentTask;
   document.getElementById('running').textContent = data.running ? '是' : '否';
@@ -102,7 +135,8 @@ async function refresh() {
   fillConfig(data.config);
   fillDebug(data.debug);
   renderTasks(data.taskList || []);
-  renderSteps(data.steps || []);
+  renderSteps(steps);
+  renderSelectedStep(steps[SELECTED_STEP_INDEX], SELECTED_STEP_INDEX);
 }
 
 async function act(name) {
@@ -111,8 +145,16 @@ async function act(name) {
 }
 
 async function selectTask(key) {
+  SELECTED_STEP_INDEX = 0;
   await apiRunAction(`select-task:${key}`);
   await refresh();
+}
+
+function selectStep(index) {
+  SELECTED_STEP_INDEX = index;
+  const steps = CURRENT_DATA?.steps || [];
+  renderSteps(steps);
+  renderSelectedStep(steps[index], index);
 }
 
 async function saveConfig() {

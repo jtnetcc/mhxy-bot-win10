@@ -22,7 +22,7 @@
       </div>
       <div class="toolbar-right">
         <button class="tb-btn primary" onclick="act('bind')">绑定窗口</button>
-        <button class="tb-btn primary" onclick="act('start-dig')">运行</button>
+        <button class="tb-btn primary" onclick="act(currentRunAction())">运行</button>
         <button class="tb-btn" onclick="act('pause')">暂停</button>
         <button class="tb-btn danger" onclick="act('stop')">停止</button>
       </div>
@@ -102,6 +102,15 @@
           <label>停止热键<input id="stop_hotkey" /></label>
           <label>暂停热键<input id="pause_hotkey" /></label>
           <label>超时秒数<input id="timeout_seconds" type="number" min="10" /></label>
+        </div>
+
+        <div class="prop-section">
+          <div class="prop-group-title">当前步骤详情</div>
+          <div class="prop-line"><span>步骤序号</span><strong id="selected_step_index">-</strong></div>
+          <div class="prop-line"><span>步骤类型</span><strong id="selected_step_type">-</strong></div>
+          <div class="prop-line"><span>步骤名称</span><strong id="selected_step_name">-</strong></div>
+          <div class="debug-mini" id="selected_step_desc">请选择一个步骤</div>
+          <div class="step-settings" id="selected_step_settings"></div>
         </div>
 
         <div class="prop-section">
