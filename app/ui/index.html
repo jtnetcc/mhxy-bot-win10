@@ -12,12 +12,12 @@
       <div class="toolbar-left">
         <div class="app-title">梦幻西游脚本工坊 - 预演版</div>
         <div class="toolbar-group">
-          <button class="tb-btn">新建</button>
-          <button class="tb-btn">保存</button>
-          <button class="tb-btn">导入</button>
-          <button class="tb-btn">导出</button>
+          <button class="tb-btn" onclick="addStep('动作')">新增步骤</button>
+          <button class="tb-btn" onclick="moveStep('up')">上移</button>
+          <button class="tb-btn" onclick="moveStep('down')">下移</button>
+          <button class="tb-btn" onclick="deleteStep()">删除步骤</button>
+          <button class="tb-btn primary" onclick="saveStepEditor()">保存步骤</button>
           <button class="tb-btn">变量</button>
-          <button class="tb-btn">设置</button>
         </div>
       </div>
       <div class="toolbar-right">
@@ -59,18 +59,18 @@
           <div class="panel component-panel">
             <div class="panel-title">步骤组件</div>
             <div class="component-grid">
-              <button class="comp-btn">图片识别</button>
-              <button class="comp-btn">多点找色</button>
-              <button class="comp-btn">OCR识别</button>
-              <button class="comp-btn">鼠标点击</button>
-              <button class="comp-btn">键盘输入</button>
-              <button class="comp-btn">延迟时间</button>
-              <button class="comp-btn">变量赋值</button>
-              <button class="comp-btn">条件判断</button>
-              <button class="comp-btn">循环流程</button>
-              <button class="comp-btn">跳转步骤</button>
-              <button class="comp-btn">日志输出</button>
-              <button class="comp-btn">外部接口</button>
+              <button class="comp-btn" onclick="addStep('图像')">图片识别</button>
+              <button class="comp-btn" onclick="addStep('图像')">多点找色</button>
+              <button class="comp-btn" onclick="addStep('OCR')">OCR识别</button>
+              <button class="comp-btn" onclick="addStep('鼠标')">鼠标点击</button>
+              <button class="comp-btn" onclick="addStep('动作')">键盘输入</button>
+              <button class="comp-btn" onclick="addStep('流程')">延迟时间</button>
+              <button class="comp-btn" onclick="addStep('流程')">变量赋值</button>
+              <button class="comp-btn" onclick="addStep('判断')">条件判断</button>
+              <button class="comp-btn" onclick="addStep('循环')">循环流程</button>
+              <button class="comp-btn" onclick="addStep('流程')">跳转步骤</button>
+              <button class="comp-btn" onclick="addStep('流程')">日志输出</button>
+              <button class="comp-btn" onclick="addStep('流程')">外部接口</button>
             </div>
           </div>
 
@@ -110,7 +110,10 @@
           <div class="prop-line"><span>步骤类型</span><strong id="selected_step_type">-</strong></div>
           <div class="prop-line"><span>步骤名称</span><strong id="selected_step_name">-</strong></div>
           <div class="debug-mini" id="selected_step_desc">请选择一个步骤</div>
-          <div class="step-settings" id="selected_step_settings"></div>
+          <label>编辑步骤名称<input id="edit_step_name" /></label>
+          <label>编辑步骤类型<input id="edit_step_type" /></label>
+          <label>编辑步骤说明<textarea id="edit_step_desc"></textarea></label>
+          <div class="settings-editor" id="selected_step_settings"></div>
         </div>
 
         <div class="prop-section">

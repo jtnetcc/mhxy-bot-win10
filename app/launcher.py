@@ -17,7 +17,7 @@ from app.vision.template_service import TemplateService
 from app.navigation.route_engine import RouteEngine
 from app.core.task_registry import TaskRegistry
 from app.core.pathing import UI_DIR
-from app.tasks.task_blueprints import TASK_BLUEPRINTS
+from app.tasks.task_blueprints import get_task_blueprint, get_task_blueprints, save_task_blueprints, make_default_step
 
 CONFIG = load_config()
 WINDOW_SERVICE = WindowService(CONFIG)
@@ -29,24 +29,30 @@ TASK_ORDER = ['dig_treasure', 'master_task', 'ghost_hunt_leader']
 
 STATE = {
     'app': 'mhxy-bot-win10',
-    'version': '0.4.1-studio-preview',
+    'version': '0.4.2-studio-editor',
     'boundWindow': '未绑定',
     'currentTask': '空闲',
     'currentTaskKey': 'dig_treasure',
     'running': False,
     'logs': [
-        '[init] studio preview ready',
+        '[init] studio editor ready',
         '[hint] 当前版本已接入自动打图 / 自动师门 / 自动抓鬼 三条任务骨架',
     ],
     'taskSnapshots': {},
 }
 
 
+def log(msg: str):
+    now = time.strftime('%H:%M:%S')
+    STATE['logs'].append(f'[{now}] {msg}')
+    STATE['logs'] = STATE['logs'][-60:]
+
+
 def get_task_list_payload():
     items = []
     for key in TASK_ORDER:
         task_cfg = CONFIG['tasks'][key]
-        bp = TASK_BLUEPRINTS[key]
+        bp = get_task_blueprint(key)
         items.append({
             'key': key,
             'label': bp['label'],
@@ -63,6 +69,26 @@ def get_current_steps():
     return task.get_step_blueprint()
 
 
+def editor_payload(extra=None):
+    payload = {
+        'taskList': get_task_list_payload(),
+        'steps': get_current_steps(),
+    }
+    if extra:
+        payload.update(extra)
+    return payload
+
+
+def mutate_current_task_steps(mutator):
+    key = STATE['currentTaskKey']
+    all_bp = get_task_blueprints()
+    task_bp = all_bp[key]
+    steps = task_bp['steps']
+    result = mutator(steps)
+    save_task_blueprints(all_bp)
+    return result
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(UI_DIR), **kwargs)
@@ -74,6 +100,11 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header('Content-Length', str(len(data)))
         self.end_headers()
         self.wfile.write(data)
+
+    def _read_json(self):
+        length = int(self.headers.get('Content-Length', '0'))
+        body = self.rfile.read(length)
+        return json.loads(body.decode('utf-8')) if body else {}
 
     def do_GET(self):
         if self.path == '/api/status':
@@ -110,9 +141,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         if self.path == '/api/config/save':
-            length = int(self.headers.get('Content-Length', '0'))
-            body = self.rfile.read(length)
-            data = json.loads(body.decode('utf-8'))
+            data = self._read_json()
 
             if 'window' in data:
                 CONFIG['window']['title_keyword'] = data['window'].get('title_keyword', CONFIG['window']['title_keyword'])
@@ -157,9 +186,85 @@ class Handler(SimpleHTTPRequestHandler):
                 ]
 
             save_config(CONFIG)
-            STATE['logs'].append(f"[{time.strftime('%H:%M:%S')}] [config] 已保存参数")
-            STATE['logs'] = STATE['logs'][-40:]
-            return self._json({'ok': True, 'config': CONFIG, 'taskList': get_task_list_payload()})
+            log('[config] 已保存参数')
+            return self._json({'ok': True, 'config': CONFIG, **editor_payload()})
+
+        if self.path == '/api/editor/add-step':
+            data = self._read_json()
+            index = int(data.get('index', len(get_current_steps())))
+            step_type = data.get('stepType', '动作')
+
+            def _add(steps):
+                insert_at = max(0, min(index, len(steps)))
+                steps.insert(insert_at, make_default_step(step_type))
+                return insert_at
+
+            new_index = mutate_current_task_steps(_add)
+            log(f'[editor] 新增步骤: {step_type} @ {new_index + 1}')
+            return self._json({'ok': True, 'selectedIndex': new_index, **editor_payload()})
+
+        if self.path == '/api/editor/delete-step':
+            data = self._read_json()
+            index = int(data.get('index', -1))
+
+            def _delete(steps):
+                if len(steps) <= 1:
+                    raise ValueError('至少保留一个步骤')
+                if index < 0 or index >= len(steps):
+                    raise IndexError('步骤不存在')
+                steps.pop(index)
+                return max(0, min(index, len(steps) - 1))
+
+            try:
+                selected = mutate_current_task_steps(_delete)
+            except Exception as e:
+                return self._json({'ok': False, 'error': str(e)}, 400)
+            log(f'[editor] 删除步骤 @ {index + 1}')
+            return self._json({'ok': True, 'selectedIndex': selected, **editor_payload()})
+
+        if self.path == '/api/editor/move-step':
+            data = self._read_json()
+            index = int(data.get('index', -1))
+            direction = data.get('direction', 'up')
+
+            def _move(steps):
+                if index < 0 or index >= len(steps):
+                    raise IndexError('步骤不存在')
+                target = index - 1 if direction == 'up' else index + 1
+                if target < 0 or target >= len(steps):
+                    return index
+                steps[index], steps[target] = steps[target], steps[index]
+                return target
+
+            try:
+                selected = mutate_current_task_steps(_move)
+            except Exception as e:
+                return self._json({'ok': False, 'error': str(e)}, 400)
+            log(f'[editor] 步骤移动 {direction}: {index + 1} -> {selected + 1}')
+            return self._json({'ok': True, 'selectedIndex': selected, **editor_payload()})
+
+        if self.path == '/api/editor/save-step':
+            data = self._read_json()
+            index = int(data.get('index', -1))
+            step = data.get('step', {})
+
+            def _save(steps):
+                if index < 0 or index >= len(steps):
+                    raise IndexError('步骤不存在')
+                steps[index] = {
+                    'type': step.get('type', '动作'),
+                    'name': step.get('name', '未命名步骤'),
+                    'desc': step.get('desc', ''),
+                    'settings': step.get('settings', []),
+                }
+                return index
+
+            try:
+                selected = mutate_current_task_steps(_save)
+            except Exception as e:
+                return self._json({'ok': False, 'error': str(e)}, 400)
+            log(f'[editor] 保存步骤 @ {index + 1}')
+            return self._json({'ok': True, 'selectedIndex': selected, **editor_payload()})
 
         if self.path.startswith('/api/action/'):
             action = self.path.split('/api/action/', 1)[1]
@@ -167,7 +272,7 @@ class Handler(SimpleHTTPRequestHandler):
             if action == 'bind':
                 result = WINDOW_SERVICE.bind_game_window()
                 STATE['boundWindow'] = result['window_title']
-                STATE['logs'].append(f"[{now}] [bind] 已绑定窗口: {result['window_title']} ({result['mode']})")
+                STATE['logs'].append(f'[{now}] [bind] 已绑定窗口: {result["window_title"]} ({result["mode"]})')
             elif action == 'start-dig':
                 STATE['running'] = True
                 STATE['currentTask'] = '自动打图'
@@ -199,8 +304,8 @@ class Handler(SimpleHTTPRequestHandler):
                 key = action.split(':', 1)[1]
                 if key in TASK_ORDER:
                     STATE['currentTaskKey'] = key
-                    STATE['currentTask'] = TASK_BLUEPRINTS[key]['label']
-                    STATE['logs'].append(f'[{now}] [ui] 切换任务视图: {TASK_BLUEPRINTS[key]["label"]}')
+                    STATE['currentTask'] = get_task_blueprint(key)['label']
+                    STATE['logs'].append(f'[{now}] [ui] 切换任务视图: {get_task_blueprint(key)["label"]}')
             elif action == 'pause':
                 STATE['running'] = False
                 STATE['logs'].append(f'[{now}] [control] 已暂停')
@@ -210,8 +315,8 @@ class Handler(SimpleHTTPRequestHandler):
                 STATE['logs'].append(f'[{now}] [control] 已停止')
             else:
                 return self._json({'error': 'unknown action'}, 404)
-            STATE['logs'] = STATE['logs'][-40:]
-            return self._json({'ok': True, 'state': STATE, 'taskList': get_task_list_payload(), 'steps': get_current_steps()})
+            STATE['logs'] = STATE['logs'][-60:]
+            return self._json({'ok': True, 'state': STATE, **editor_payload()})
         return self._json({'error': 'not found'}, 404)
 
 

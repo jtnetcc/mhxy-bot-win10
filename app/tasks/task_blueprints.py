@@ -1,4 +1,12 @@
-TASK_BLUEPRINTS = {
+import copy
+import json
+from pathlib import Path
+
+from app.core.pathing import CONFIG_DIR
+
+OVERRIDE_PATH = CONFIG_DIR / 'task_blueprints.override.json'
+
+DEFAULT_TASK_BLUEPRINTS = {
     'dig_treasure': {
         'label': '自动打图',
         'category': 'treasure',
@@ -268,3 +276,51 @@ TASK_BLUEPRINTS = {
         ],
     },
 }
+
+_CACHE = None
+
+
+def _deepcopy(data):
+    return copy.deepcopy(data)
+
+
+def load_task_blueprints():
+    global _CACHE
+    if _CACHE is not None:
+        return _deepcopy(_CACHE)
+    if OVERRIDE_PATH.exists():
+        try:
+            _CACHE = json.loads(OVERRIDE_PATH.read_text(encoding='utf-8'))
+            return _deepcopy(_CACHE)
+        except Exception:
+            pass
+    _CACHE = _deepcopy(DEFAULT_TASK_BLUEPRINTS)
+    return _deepcopy(_CACHE)
+
+
+def get_task_blueprints():
+    return load_task_blueprints()
+
+
+def get_task_blueprint(key: str):
+    return load_task_blueprints()[key]
+
+
+def save_task_blueprints(data: dict):
+    global _CACHE
+    OVERRIDE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OVERRIDE_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+    _CACHE = _deepcopy(data)
+    return _deepcopy(_CACHE)
+
+
+def make_default_step(step_type='动作'):
+    return {
+        'type': step_type,
+        'name': f'新{step_type}步骤',
+        'desc': '请补充这个步骤的说明',
+        'settings': [
+            {'label': '参数1', 'value': '待配置'},
+            {'label': '参数2', 'value': '待配置'},
+        ],
+    }
