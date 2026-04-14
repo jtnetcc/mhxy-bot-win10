@@ -46,10 +46,11 @@
   - 浏览器原型模式（HTTP API）
   - Tauri 桌面模式（`window.__TAURI__.core.invoke`）
 - 当前主机缺少 Rust / cargo，尚未在本机完成 Tauri 编译验证
+- 已补 Windows Tauri build workflow 与基础图标占位
 - 下一步应补：
-  1. Windows Rust toolchain
-  2. Tauri build workflow
-  3. 图标/签名/安装器配置
+  1. 跑通首次 Tauri Windows CI
+  2. 修正 bundling 细节（若有）
+  3. 补正式图标/签名/安装器配置
 
 ## 进入真实接入前需要准备
 - Win10 游戏客户端环境
